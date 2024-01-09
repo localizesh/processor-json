@@ -20,10 +20,11 @@ function processAndCompare(filename: string) {
   const outDocStructureStr = JSON.stringify(outDocStructure);
 
   assert.equal(outDocStructureStr, docStr);
+
   console.log(filename);
 }
 
-describe('YamlProcessorTest', function() {
+describe('JsonProcessorTest', function() {
   it('documents should be equal', function() {
     processAndCompare('simple.json');
     processAndCompare('matesics.json');
