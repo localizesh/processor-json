@@ -26,6 +26,7 @@ function processAndCompare(filename: string) {
 
 describe('JsonProcessorTest', function() {
   it('documents should be equal', function() {
+    processAndCompare('06.09.json');
     processAndCompare('simple.json');
     processAndCompare('matesics.json');
     processAndCompare('footer.json');

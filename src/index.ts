@@ -156,7 +156,7 @@ class JsonProcessor implements Processor {
 
         })
 
-        return JSON.stringify(convertMapToJson(rows))
+        return JSON.stringify(convertMapToJson(rows), null, 2)
     }
 }
 
