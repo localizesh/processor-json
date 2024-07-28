@@ -13,6 +13,7 @@
     "test": "mocha"
   },
   "dependencies": {
+    "@localizesh/sdk": "^0.2.0",
     "unist-util-visit-parents": "^6.0.1"
   },
   "devDependencies": {
@@ -23,9 +24,6 @@
     "mocha": "^10.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
-  },
-  "peerDependencies": {
-    "@localizeio/lib": "^0.3.0"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
