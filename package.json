@@ -19,9 +19,9 @@
   "devDependencies": {
     "@types/chai": "^4.3.16",
     "@types/hast": "^3.0.4",
-    "@types/mocha": "^10.0.6",
+    "@types/mocha": "^10.0.7",
     "chai": "^5.1.1",
-    "mocha": "^10.4.0",
+    "mocha": "^10.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
