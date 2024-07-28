@@ -1,4 +1,4 @@
-import {Context, Document, IdGenerator, Layout, Processor, Segment} from "@localizeio/lib";
+import {Context, Document, IdGenerator, LayoutRoot, Processor, Segment} from "@localizesh/sdk";
 import {visitParents} from "unist-util-visit-parents";
 import {SegmentsMap} from "./types";
 
@@ -70,7 +70,7 @@ class JsonProcessor implements Processor {
     }
 
     parse(res: string): Document {
-        const idGenerator: IdGenerator = new IdGenerator(this.context);
+        const idGenerator: IdGenerator = new IdGenerator();
         const segments: Segment[] = []
         const resJson = JSON.parse(res)
         const resMap = convertJsonToMap(resJson)
@@ -117,7 +117,7 @@ class JsonProcessor implements Processor {
             }
         })
 
-        const layout: Layout = {
+        const layout: LayoutRoot = {
             type: "root",
             children: [
                 {
