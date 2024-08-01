@@ -133,7 +133,7 @@ class JsonProcessor implements Processor {
         return {segments, layout}
     }
 
-    stringify(data: Document): string {
+    stringify(data: Document, ctx?: Context): string {
         const segmentsMap: SegmentsMap = {};
 
         data.segments.forEach((segment: Segment): void => {
