@@ -63,13 +63,7 @@ function convertMapToJson(rows: {key: string, value: string}[]) {
 }
 
 class JsonProcessor implements Processor {
-    private context: Context;
-
-    constructor(context: Context) {
-        this.context = context;
-    }
-
-    parse(res: string): Document {
+    parse(res: string, ctx?: Context): Document {
         const idGenerator: IdGenerator = new IdGenerator();
         const segments: Segment[] = []
         const resJson = JSON.parse(res)
@@ -78,7 +72,7 @@ class JsonProcessor implements Processor {
 
         const element: any = resKeys.map((key) => {
             const value = resMap[key].toString()
-            const id: string = idGenerator.generateId(value, {})
+            const id: string = idGenerator.generateId(value, {}, ctx)
             const segment: Segment = {
                 id,
                 text: value || "",
@@ -139,7 +133,7 @@ class JsonProcessor implements Processor {
         return {segments, layout}
     }
 
-    stringify(data: Document): string {
+    stringify(data: Document, ctx?: Context): string {
         const segmentsMap: SegmentsMap = {};
 
         data.segments.forEach((segment: Segment): void => {

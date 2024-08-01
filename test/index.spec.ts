@@ -5,7 +5,7 @@ import path from "path";
 
 import JsonProcessor from "../src/index.js";
 
-const processor = new JsonProcessor("test");
+const processor = new JsonProcessor();
 
 function processAndCompare(filename: string) {
   const inDoc = fs.readFileSync(path.join('test', 'fixtures', filename), { encoding: 'utf-8' });
