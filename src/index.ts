@@ -27,7 +27,7 @@ function convertJsonToMap(jsonObj: any, parentKey: string = ''): Record<string, 
     return result;
 }
 
-function convertMapToJson(rows: {key: string, value: string}[]) {
+function convertMapToJson(rows: {key: string, value: string | boolean}[]) {
     const result = {};
 
     rows.forEach(row => {
@@ -50,10 +50,10 @@ function convertMapToJson(rows: {key: string, value: string}[]) {
         }
 
         const lastKey: string = keys[keys.length - 1];
-        const lastValue: string = value;
+        const lastValue: string | boolean = value;
 
-        if (Number.isInteger(Number(lastKey))) {
-            currentObj.push({ [lastValue.split(':')[0].trim()]: lastValue.split(':')[1].trim() });
+        if (Number.isInteger(Number(lastKey)) && typeof lastValue !== "boolean") {
+            currentObj.push({ [lastValue?.split(':')[0].trim()]: lastValue.split(':')[1].trim() });
         } else {
             currentObj[lastKey] = lastValue;
         }
@@ -71,7 +71,11 @@ class JsonProcessor implements Processor {
         const resKeys = Object.keys(resMap)
 
         const element: any = resKeys.map((key) => {
-            const value = resMap[key].toString()
+
+            let value = resMap[key]
+            const isBool = typeof value === "boolean"
+            value = value.toString();
+
             const id: string = idGenerator.generateId(value, {}, ctx)
             const segment: Segment = {
                 id,
@@ -99,7 +103,7 @@ class JsonProcessor implements Processor {
                     {
                         type: "element",
                         tagName: "td",
-                        properties: {},
+                        properties: isBool ? {isBool: true} : {},
                         children: [
                             {
                                 "type": "segment",
@@ -140,14 +144,14 @@ class JsonProcessor implements Processor {
             segmentsMap[segment.id] = segment;
         });
 
-        const rows: {key: string, value: string}[] = []
+        const rows: {key: string, value: string | boolean}[] = []
 
         visitParents(data.layout, { tagName: "tr" }, (row: any) => {
             const key = row.children[0].children[0].value
+            const isBool = row.children[1]?.properties?.isBool;
+
             const value = segmentsMap[row.children[1].children[0].id].text
-
-            rows.push({key, value})
-
+            rows.push({key, value: isBool ? (value === "true") : value})
         })
 
         return JSON.stringify(convertMapToJson(rows), null, 2)
