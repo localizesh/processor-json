@@ -2,72 +2,12 @@ import {Context, Document, IdGenerator, LayoutRoot, Processor, Segment} from "@l
 import {visitParents} from "unist-util-visit-parents";
 import {SegmentsMap} from "./types";
 
-function convertJsonToMap(jsonObj: any, parentKey: string = ''): Record<string, any> {
-    let result: Record<string, any> = {};
-
-    for (const [key, value] of Object.entries(jsonObj)) {
-        const newKey = parentKey ? `${parentKey}.${key}` : key;
-
-        if (typeof value === 'object' && value !== null) {
-            Object.assign(result, convertJsonToMap(value as any, newKey));
-        } else if (Array.isArray(value)) {
-            value.forEach((item, index) => {
-                const arrayKey = `${newKey}..${index}`;
-                if (typeof item === 'object' && item !== null) {
-                    Object.assign(result, convertJsonToMap(item as any, arrayKey));
-                } else {
-                    result[arrayKey] = item;
-                }
-            });
-        } else {
-            result[newKey] = value;
-        }
-    }
-
-    return result;
-}
-
-function convertMapToJson(rows: {key: string, value: string | boolean}[]) {
-    const result = {};
-
-    rows.forEach(row => {
-        const {key, value} = row
-        const keys = key.split('.').map(str => str.trim());
-        let currentObj: any = result;
-
-        for (let i = 0; i < keys.length - 1; i++) {
-            const currentKey = keys[i];
-
-            if (!currentObj[currentKey]) {
-                if (Number.isInteger(Number(keys[i + 1]))) {
-                    currentObj[currentKey] = [];
-                } else {
-                    currentObj[currentKey] = {};
-                }
-            }
-
-            currentObj = currentObj[currentKey];
-        }
-
-        const lastKey: string = keys[keys.length - 1];
-        const lastValue: string | boolean = value;
-
-        if (Number.isInteger(Number(lastKey)) && typeof lastValue !== "boolean") {
-            currentObj.push({ [lastValue?.split(':')[0].trim()]: lastValue.split(':')[1].trim() });
-        } else {
-            currentObj[lastKey] = lastValue;
-        }
-    });
-
-    return result;
-}
-
 class JsonProcessor implements Processor {
     parse(res: string, ctx?: Context): Document {
         const idGenerator: IdGenerator = new IdGenerator();
         const segments: Segment[] = []
         const resJson = JSON.parse(res)
-        const resMap = convertJsonToMap(resJson)
+        const resMap = this._convertJsonToMap(resJson)
         const resKeys = Object.keys(resMap)
 
         const element: any = resKeys.map((key) => {
@@ -154,8 +94,68 @@ class JsonProcessor implements Processor {
             rows.push({key, value: isBool ? (value === "true") : value})
         })
 
-        return JSON.stringify(convertMapToJson(rows), null, 2)
+        return JSON.stringify(this._convertMapToJson(rows), null, 2)
     }
+
+  protected _convertJsonToMap(jsonObj: any, parentKey: string = ''): Record<string, any> {
+    let result: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(jsonObj)) {
+      const newKey = parentKey ? `${parentKey}.${key}` : key;
+
+      if (typeof value === 'object' && value !== null) {
+        Object.assign(result, this._convertJsonToMap(value as any, newKey));
+      } else if (Array.isArray(value)) {
+        value!.forEach((item, index) => {
+          const arrayKey = `${newKey}..${index}`;
+          if (typeof item === 'object' && item !== null) {
+            Object.assign(result, this._convertJsonToMap(item as any, arrayKey));
+          } else {
+            result[arrayKey] = item;
+          }
+        });
+      } else {
+        result[newKey] = value;
+      }
+    }
+
+    return result;
+  }
+
+  protected _convertMapToJson(rows: {key: string, value: string | boolean}[]) {
+    const result = {};
+
+    rows.forEach(row => {
+      const {key, value} = row
+      const keys = key.split('.').map(str => str.trim());
+      let currentObj: any = result;
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        const currentKey = keys[i];
+
+        if (!currentObj[currentKey]) {
+          if (Number.isInteger(Number(keys[i + 1]))) {
+            currentObj[currentKey] = [];
+          } else {
+            currentObj[currentKey] = {};
+          }
+        }
+
+        currentObj = currentObj[currentKey];
+      }
+
+      const lastKey: string = keys[keys.length - 1];
+      const lastValue: string | boolean = value;
+
+      if (Number.isInteger(Number(lastKey)) && typeof lastValue !== "boolean") {
+        currentObj.push({ [lastValue?.split(':')[0].trim()]: lastValue.split(':')[1].trim() });
+      } else {
+        currentObj[lastKey] = lastValue;
+      }
+    });
+
+    return result;
+  }
 }
 
 export default JsonProcessor;
