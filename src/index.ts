@@ -122,7 +122,7 @@ class JsonProcessor implements Processor {
     return result;
   }
 
-  protected _convertMapToJson(rows: {key: string, value: string | boolean}[]) {
+  protected _convertMapToJson(rows: {key: string, value: string | boolean | number}[]) {
     const result = {};
 
     rows.forEach(row => {
@@ -145,9 +145,9 @@ class JsonProcessor implements Processor {
       }
 
       const lastKey: string = keys[keys.length - 1];
-      const lastValue: string | boolean = value;
+      const lastValue: string | boolean | number = value;
 
-      if (Number.isInteger(Number(lastKey)) && typeof lastValue !== "boolean") {
+      if (Number.isInteger(Number(lastKey)) && typeof lastValue === "string") {
         currentObj.push({ [lastValue?.split(':')[0].trim()]: lastValue.split(':')[1].trim() });
       } else {
         currentObj[lastKey] = lastValue;
