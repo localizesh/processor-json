@@ -3,99 +3,109 @@ import {visitParents} from "unist-util-visit-parents";
 import {SegmentsMap} from "./types";
 
 class JsonProcessor implements Processor {
-    parse(res: string, ctx?: Context): Document {
-        const idGenerator: IdGenerator = new IdGenerator();
-        const segments: Segment[] = []
-        const resJson = JSON.parse(res)
-        const resMap = this._convertJsonToMap(resJson)
-        const resKeys = Object.keys(resMap)
+  parse(res: string, ctx?: Context): Document {
+    const idGenerator: IdGenerator = new IdGenerator();
+    const segments: Segment[] = [];
+    const resJson = JSON.parse(res);
+    const resMap = this._convertJsonToMap(resJson);
+    const resKeys = Object.keys(resMap);
 
-        const element: any = resKeys.map((key) => {
+    const element: any = resKeys.map((key) => {
 
-            let value = resMap[key]
-            const isBool = typeof value === "boolean"
-            value = value.toString();
+      let value = resMap[key];
+      const isBool = typeof value === "boolean";
+      const isNumber = this.isNumber(value);
+      value = value.toString();
 
-            const id: string = idGenerator.generateId(value, {}, ctx)
-            const segment: Segment = {
-                id,
-                text: value || "",
-            };
+      const id: string = idGenerator.generateId(value, {}, ctx);
+      const segment: Segment = {
+        id,
+        text: value || "",
+      };
 
-            segments.push(segment);
+      segments.push(segment);
 
-            return {
-                type: "element",
-                tagName: "tr",
-                properties: {},
-                children: [
-                    {
-                        type: "element",
-                        tagName: "td",
-                        properties: {},
-                        children: [
-                            {
-                                type: "text",
-                                value: key
-                            }
-                        ]
-                    },
-                    {
-                        type: "element",
-                        tagName: "td",
-                        properties: isBool ? {isBool: true} : {},
-                        children: [
-                            {
-                                "type": "segment",
-                                "id": id
-                            }
-                        ]
-                    }
-                ]
-            }
-        })
-
-        const layout: LayoutRoot = {
-            type: "root",
+      return {
+        type: "element",
+        tagName: "tr",
+        properties: {},
+        children: [
+          {
+            type: "element",
+            tagName: "td",
+            properties: {},
             children: [
-                {
-                    type: "element",
-                    tagName: "table",
-                    children: [
-                        {
-                            type: "element",
-                            tagName: "tbody",
-                            properties: {},
-                            children: element
-                        }
-                    ],
-                    properties: {}
-                }
+              {
+                type: "text",
+                value: key
+              }
             ]
+          },
+          {
+            type: "element",
+            tagName: "td",
+            properties: isBool
+              ? {isBool: true}
+              : isNumber
+                ? {isNumber: true}
+                : {},
+            children: [
+              {
+                "type": "segment",
+                "id": id
+              }
+            ]
+          }
+        ]
+      };
+    });
+
+    const layout: LayoutRoot = {
+      type: "root",
+      children: [
+        {
+          type: "element",
+          tagName: "table",
+          children: [
+            {
+              type: "element",
+              tagName: "tbody",
+              properties: {},
+              children: element
+            }
+          ],
+          properties: {}
         }
+      ]
+    };
 
-        return {segments, layout}
-    }
+    return {segments, layout};
+  }
 
-    stringify(data: Document, ctx?: Context): string {
-        const segmentsMap: SegmentsMap = {};
+  stringify(data: Document, ctx?: Context): string {
+    const segmentsMap: SegmentsMap = {};
 
-        data.segments.forEach((segment: Segment): void => {
-            segmentsMap[segment.id] = segment;
-        });
+    data.segments.forEach((segment: Segment): void => {
+      segmentsMap[segment.id] = segment;
+    });
 
-        const rows: {key: string, value: string | boolean}[] = []
+    const rows: { key: string, value: string | boolean | number }[] = [];
 
-        visitParents(data.layout, { tagName: "tr" }, (row: any) => {
-            const key = row.children[0].children[0].value
-            const isBool = row.children[1]?.properties?.isBool;
+    visitParents(data.layout, {tagName: "tr"}, (row: any) => {
+      const key = row.children[0].children[0].value
+      const isBool = row.children[1]?.properties?.isBool;
+      const isNumber = row.children[1]?.properties?.isNumber;
 
-            const value = segmentsMap[row.children[1].children[0].id].text
-            rows.push({key, value: isBool ? (value === "true") : value})
-        })
+      const value = segmentsMap[row.children[1].children[0].id].text;
+      rows.push({key, value: isBool ? (value === "true") : isNumber ? Number(value) : value});
+    });
 
-        return JSON.stringify(this._convertMapToJson(rows), null, 2)
-    }
+    return JSON.stringify(this._convertMapToJson(rows), null, 2);
+  }
+
+  protected isNumber(value: any) {
+    return typeof value === 'number' && !isNaN(value) && Number.isFinite(value);
+  }
 
   protected _convertJsonToMap(jsonObj: any, parentKey: string = ''): Record<string, any> {
     let result: Record<string, any> = {};
@@ -122,11 +132,11 @@ class JsonProcessor implements Processor {
     return result;
   }
 
-  protected _convertMapToJson(rows: {key: string, value: string | boolean}[]) {
+  protected _convertMapToJson(rows: { key: string, value: string | boolean | number }[]) {
     const result = {};
 
     rows.forEach(row => {
-      const {key, value} = row
+      const {key, value} = row;
       const keys = key.split('.').map(str => str.trim());
       let currentObj: any = result;
 
@@ -145,10 +155,10 @@ class JsonProcessor implements Processor {
       }
 
       const lastKey: string = keys[keys.length - 1];
-      const lastValue: string | boolean = value;
+      const lastValue: string | boolean | number = value;
 
-      if (Number.isInteger(Number(lastKey)) && typeof lastValue !== "boolean") {
-        currentObj.push({ [lastValue?.split(':')[0].trim()]: lastValue.split(':')[1].trim() });
+      if (Number.isInteger(Number(lastKey)) && typeof lastValue === "string") {
+        currentObj.push({[lastValue?.split(':')[0].trim()]: lastValue.split(':')[1].trim()});
       } else {
         currentObj[lastKey] = lastValue;
       }

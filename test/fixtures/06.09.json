@@ -1,7 +1,7 @@
 {
 	"physics":[
 		{
-			"name": "Mechanics", 
+			"name": "Mechanics",
 			"sections":[
 				{
 					"name": "Kinematics",
@@ -10,12 +10,12 @@
 					"bool": true
 
 
-					
+
 				},
 				{
 					"name": "Hydrodynamics",
 					"complexity": "4",
-					"interest": "3",
+					"interest": 3,
 					"bool": false
 
 				}
@@ -23,13 +23,13 @@
 		},
 			{
 			 	"note": "addition",
-			 	"useful links": 
+			 	"useful links":
 			 	[
-			 		{ 	"url" :"https://ru.wikipedia.org/wiki/%D0%A4%D0%B8%D0%B7%D0%B8%D0%BA%D0%B0" 
+			 		{ 	"url" :"https://ru.wikipedia.org/wiki/%D0%A4%D0%B8%D0%B7%D0%B8%D0%BA%D0%B0"
 			 }
 			 	]
-			
-		
+
+
 	},
 			{
 			 	"name": "Electricity",
@@ -41,6 +41,6 @@
 			 }
 			 	]
 			}
-		
+
 	]
 }
