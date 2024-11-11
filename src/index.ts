@@ -15,7 +15,8 @@ class JsonProcessor implements Processor {
       let value = resMap[key];
       const isBool = typeof value === "boolean";
       const isNumber = this.isNumber(value);
-      value = value.toString();
+      const isNull = value === null;
+      value = (isNull) ? "" : value.toString();
 
       const id: string = idGenerator.generateId(value, {}, ctx);
       const segment: Segment = {
@@ -48,7 +49,9 @@ class JsonProcessor implements Processor {
               ? {isBool: true}
               : isNumber
                 ? {isNumber: true}
-                : {},
+                : isNull
+                  ? {isNull: true}
+                  : {},
             children: [
               {
                 "type": "segment",
@@ -89,15 +92,23 @@ class JsonProcessor implements Processor {
       segmentsMap[segment.id] = segment;
     });
 
-    const rows: { key: string, value: string | boolean | number }[] = [];
+    const rows: { key: string, value: string | boolean | number | null }[] = [];
 
     visitParents(data.layout, {tagName: "tr"}, (row: any) => {
       const key = row.children[0].children[0].value
       const isBool = row.children[1]?.properties?.isBool;
       const isNumber = row.children[1]?.properties?.isNumber;
+      const isNull = row.children[1]?.properties?.isNull;
 
-      const value = segmentsMap[row.children[1].children[0].id].text;
-      rows.push({key, value: isBool ? (value === "true") : isNumber ? Number(value) : value});
+      const item = segmentsMap[row.children[1].children[0].id].text;
+      const value = isBool
+        ? (item === "true")
+        : isNumber
+          ? Number(item)
+          : isNull
+            ? null
+            : item;
+      rows.push({key, value});
     });
 
     return JSON.stringify(this._convertMapToJson(rows), null, 2);
@@ -132,7 +143,7 @@ class JsonProcessor implements Processor {
     return result;
   }
 
-  protected _convertMapToJson(rows: { key: string, value: string | boolean | number }[]) {
+  protected _convertMapToJson(rows: { key: string, value: string | boolean | number | null }[]) {
     const result = {};
 
     rows.forEach(row => {
@@ -155,7 +166,7 @@ class JsonProcessor implements Processor {
       }
 
       const lastKey: string = keys[keys.length - 1];
-      const lastValue: string | boolean | number = value;
+      const lastValue: string | boolean | number | null = value;
 
       if (Number.isInteger(Number(lastKey)) && typeof lastValue === "string") {
         currentObj.push({[lastValue?.split(':')[0].trim()]: lastValue.split(':')[1].trim()});
