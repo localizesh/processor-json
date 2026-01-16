@@ -1,4 +1,4 @@
-# @localizesh/processor-json
+# Localize.sh JSON Processor
 
 JSON processor for the localize.sh ecosystem. This package parses JSON files into a localization-friendly AST (Abstract Syntax Tree) and stringifies them back, preserving structure while allowing content extraction.
 
@@ -55,4 +55,3 @@ npm test
 ## License
 
 [Apache-2.0](LICENSE)
-
