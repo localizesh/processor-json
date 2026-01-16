@@ -1,15 +1,28 @@
 {
   "links": [
-    { "url": "https://about.google/?hl=es", "text": "Sobre Google" },
+    {
+      "url": "https://about.google/?hl=es",
+      "text": "Sobre Google",
+      "required": true,
+      "hide": "true"
+    },
     {
       "url": "https://about.google/products/?hl=es",
-      "text": "Productos de Google"
+      "text": "Productos de Google",
+      "required": true,
+      "hide": "true"
     },
     {
       "url": "https://policies.google.com/privacy?hl=es",
-      "text": "Privacidad"
+      "text": "Privacidad",
+      "required": true,
+      "hide": "false"
     },
-    { "url": "https://policies.google.com/terms?hl=es", "text": "Términos" },
+    {
+      "url": "https://policies.google.com/terms?hl=es",
+      "text": "Términos",
+      "required": false
+    },
     {
       "url": "https://bugs.chromium.org/p/chromium/issues/entry?template=Defect%20on%20Chrome%20OS",
       "text": {
@@ -32,6 +45,9 @@
       }
     }
   ],
-  "help": { "url": "https://support.google.com/?hl=es", "text": "Ayuda" },
+  "help": {
+    "url": "https://support.google.com/?hl=es",
+    "text": "Ayuda"
+  },
   "selectLang": "Selecione el idioma que prefiere"
 }
