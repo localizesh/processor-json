@@ -9,7 +9,7 @@ template: |
   $CHANGES
 
   ---
-  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$TAG
+  **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
 
 categories:
   - title: "💣 Breaking Changes"
@@ -63,7 +63,6 @@ version-resolver:
       - "security"
   default: patch
 
-# Опционально: автолейблинг (можно удалить целиком, если не хотите магии)
 autolabeler:
   - label: "breaking"
     title:
