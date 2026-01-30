@@ -1,12 +1,14 @@
 import {
   Document,
   LayoutRoot,
-  SegmentNode,
   Segment,
   Context,
+  element,
+  root,
+  segment,
+  LayoutElement,
 } from "@localizesh/sdk";
 import { Processor, IdGenerator, visitParents } from "@localizesh/sdk";
-import { h } from "hastscript";
 
 function convertJsonToMap(
   jsonObj: Record<string, any> | any[],
@@ -82,31 +84,23 @@ export default class JsonProcessor extends Processor {
 
     const rows = resKeys.map((key) => {
       const value = String(resMap[key]);
-      const id: string = idGenerator.generateId(value, {});
-      const segment: Segment = {
+      const id: string = idGenerator.generateId(value);
+
+      segments.push({
         id,
         text: value || "",
-      };
+      });
 
-      segments.push(segment);
+      const segmentNode = segment(id);
 
-      const segmentNode: SegmentNode = {
-        type: "segment",
-        id: id,
-      };
-
-      // Use hastscript to build the row
-      return h("tr", [h("td", key), h("td", [segmentNode])]);
+      return element("tr", [element("td", key), element("td", [segmentNode])]);
     });
 
     // Use hastscript to build the table
     // layout must be LayoutRoot (which extends HastRoot)
-    const table = h("table", [h("tbody", rows)]);
+    const table = element("table", [element("tbody", rows)]);
 
-    const layout: LayoutRoot = {
-      type: "root",
-      children: [table],
-    };
+    const layout: LayoutRoot = root([table]);
 
     return { segments, layout };
   }
@@ -120,36 +114,37 @@ export default class JsonProcessor extends Processor {
 
     const rows: { key: string; value: string }[] = [];
 
-    visitParents(doc.layout, (node) => {
-      if (
-        node.type === "element" &&
-        node.tagName === "tr" &&
-        node.children.length === 2
-      ) {
-        // We know structure is <tr><td>Key</td><td><SegmentNode/></td></tr>
-        const keyTd = node.children[0];
-        const valueTd = node.children[1];
+    visitParents(
+      doc.layout,
+      (node): node is LayoutElement =>
+        node.type === "element" && (node as LayoutElement).tagName === "tr",
+      (element: LayoutElement) => {
+        if (element.children.length === 2) {
+          // We know structure is <tr><td>Key</td><td><SegmentNode/></td></tr>
+          const keyTd = element.children[0];
+          const valueTd = element.children[1];
 
-        if (
-          keyTd.type === "element" &&
-          valueTd.type === "element" &&
-          keyTd.children.length > 0 &&
-          valueTd.children.length > 0
-        ) {
-          const keyNode = keyTd.children[0];
-          const valueNode = valueTd.children[0];
+          if (
+            keyTd.type === "element" &&
+            valueTd.type === "element" &&
+            keyTd.children.length > 0 &&
+            valueTd.children.length > 0
+          ) {
+            const keyNode = keyTd.children[0];
+            const valueNode = valueTd.children[0];
 
-          if (keyNode.type === "text" && valueNode.type === "segment") {
-            const key = keyNode.value;
-            const segment = segmentsMap[valueNode.id];
-            if (segment) {
-              rows.push({ key, value: segment.text });
+            if (keyNode.type === "text" && valueNode.type === "segment") {
+              const key = keyNode.value;
+              const segment = segmentsMap[valueNode.id];
+              if (segment) {
+                rows.push({ key, value: segment.text });
+              }
             }
           }
+          return "skip";
         }
-        return "skip";
-      }
-    });
+      },
+    );
 
     return JSON.stringify(convertMapToJson(rows), null, 2);
   }
