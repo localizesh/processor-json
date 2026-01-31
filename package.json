@@ -17,12 +17,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@localizesh/sdk": "^1.0.0",
-    "hastscript": "^9.0.1"
+    "@localizesh/sdk": "^2.0.0"
   },
   "devDependencies": {
-    "@types/node": "^25.0.9",
-    "typescript": "^5.5.4",
-    "vitest": "^4.0.17"
+    "@types/node": "^25.1.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }
