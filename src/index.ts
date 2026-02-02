@@ -93,12 +93,12 @@ export default class JsonProcessor extends Processor {
 
       const segmentNode = segment(id);
 
-      return element("tr", [element("td", key), element("td", [segmentNode])]);
+      return element("tr", element("td", key), element("td", segmentNode));
     });
 
     // Use hastscript to build the table
     // layout must be LayoutRoot (which extends HastRoot)
-    const table = element("table", [element("tbody", rows)]);
+    const table = element("table", element("tbody", rows));
 
     const layout: LayoutRoot = root([table]);
 
