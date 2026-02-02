@@ -1,6 +1,6 @@
 {
   "name": "@localizesh/processor-json",
-  "description": "A Localize.sh processor for JSON files.",
+  "description": "A Localize.sh processor for JSON files",
   "repository": "localizesh/processor-json",
   "license": "Apache-2.0",
   "author": "Localize.sh",
